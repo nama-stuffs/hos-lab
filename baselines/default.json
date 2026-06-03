@@ -1,0 +1,64 @@
+{
+  "candidate": "default",
+  "savedAt": "2026-06-03T09:11:09.910Z",
+  "score": {
+    "overall": 0.994,
+    "aspects": {
+      "spec": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
+      "retrieval": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
+      "orchestration": {
+        "score": 1,
+        "passed": 2,
+        "total": 2
+      },
+      "process": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
+      "install": {
+        "score": 1,
+        "passed": 6,
+        "total": 6
+      },
+      "upgrade": {
+        "score": 1,
+        "passed": 2,
+        "total": 2
+      },
+      "safety": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
+      "efficiency": {
+        "score": 1,
+        "processFrictions": 0
+      },
+      "coverage": {
+        "score": 1,
+        "passed": 14,
+        "total": 14
+      },
+      "quality": {
+        "score": 0.94,
+        "agentGraded": true,
+        "dimensions": {
+          "coherence": 0.95,
+          "clarity": 0.95,
+          "ac-discipline": 0.92
+        }
+      }
+    },
+    "scenarios": 14,
+    "frictionsByType": {}
+  }
+}

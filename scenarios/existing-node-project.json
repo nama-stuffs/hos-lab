@@ -1,0 +1,24 @@
+{
+  "id": "existing-node-project",
+  "fixture": "existing-node",
+  "phase": "adopt",
+  "classification": "adopt",
+  "candidateHosArea": ".hos/tools/lib/install-files.mjs",
+  "commands": [
+    ["status"],
+    ["adopt", "--name", "Lab Node"],
+    ["doctor"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "mode", "equals": "adopt" },
+    { "type": "jsonArrayIncludes", "command": 1, "path": "detected", "includes": "package.json" },
+    { "type": "fileEquals", "path": "README.md", "text": "# Host Project\n" },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "runtime.install", "equals": "npm install" },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "runtime.dev", "equals": "npm run dev" },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "runtime.build", "equals": "npm run build" },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "checks.lint", "equals": "npm run lint" },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "checks.unit", "equals": "npm test" },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "checks.e2e", "equals": "npm run e2e" },
+    { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
+  ]
+}

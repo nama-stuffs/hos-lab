@@ -1,0 +1,17 @@
+{
+  "id": "benchmark-compare",
+  "fixture": "empty",
+  "phase": "bench",
+  "classification": "benchmark",
+  "candidateHosArea": ".hos/tools/lib/bench.mjs",
+  "commands": [
+    ["init", "--name", "Lab Bench"],
+    ["bench", "--compare"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "docHealthy.verdict", "equals": "ok" },
+    { "type": "jsonField", "command": 1, "path": "policyRecall.verdict", "matches": "same|better" },
+    { "type": "jsonField", "command": 1, "path": "policyApplication.verdict", "matches": "same|better" },
+    { "type": "jsonField", "command": 1, "path": "precision.verdict", "matches": "same|better" }
+  ]
+}

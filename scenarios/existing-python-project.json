@@ -1,0 +1,24 @@
+{
+  "id": "existing-python-project",
+  "fixture": "existing-python",
+  "phase": "adopt",
+  "classification": "adopt",
+  "candidateHosArea": ".hos/tools/lib/install-files.mjs",
+  "commands": [
+    ["status"],
+    ["adopt", "--name", "Lab Python"],
+    ["doctor"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "mode", "equals": "adopt" },
+    { "type": "jsonArrayIncludes", "command": 1, "path": "detected", "includes": "python" },
+    {
+      "type": "jsonArrayIncludes",
+      "command": 1,
+      "path": "detected",
+      "includes": "commands unknown - interview for runtime/checks"
+    },
+    { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "runtime.install", "equals": "" },
+    { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
+  ]
+}

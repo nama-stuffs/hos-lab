@@ -1,0 +1,24 @@
+{
+  "id": "command-deep-log",
+  "fixture": "empty",
+  "phase": "parallel",
+  "classification": "deep-log",
+  "candidateHosArea": ".hos/tools/lib/ledger.mjs",
+  "commands": [
+    ["init", "--name", "Lab DeepLog"],
+    ["ticket", "create", "Deep log ticket"],
+    ["run", "${command.1.id}", "--by", "worker-a", "--", "echo", "CAPTURED"],
+    ["ticket", "log", "${command.1.id}", "--kind", "handoff", "--summary", "done", "--by", "worker-a"],
+    ["ticket", "thread", "${command.1.id}"],
+    ["dispatch", "${command.1.id}", "--lenses", "frontend+ux", "--by", "worker-a"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 4, "path": "runs.length", "equals": 1 },
+    { "type": "jsonField", "command": 4, "path": "runs.0.exit", "equals": 0 },
+    { "type": "jsonField", "command": 4, "path": "runs.0.cmd", "matches": "echo" },
+    { "type": "jsonArrayObjectIncludes", "command": 4, "path": "journey", "field": "kind", "equals": "handoff" },
+    { "type": "fileContains", "path": ".hos/tickets/${command.1.id}/log/run-001.out", "text": "CAPTURED" },
+    { "type": "commandStdoutContains", "command": 5, "text": "Worker contract" },
+    { "type": "commandStdoutContains", "command": 5, "text": "Frontend" }
+  ]
+}

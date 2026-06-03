@@ -1,0 +1,20 @@
+{
+  "id": "existing-hos-upgrade",
+  "fixture": "existing-hos-upgrade",
+  "phase": "upgrade",
+  "classification": "upgrade",
+  "candidateHosArea": ".hos/tools/lib/upgrade.mjs",
+  "commands": [
+    ["upgrade", "--from", "${source.path}"],
+    ["upgrade", "--from", "${source.path}", "--apply"],
+    ["doctor"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "applied", "equals": false },
+    { "type": "jsonField", "command": 0, "path": "changes.update", "gte": 1, "expect": "dry-run detects >=1 stale framework file" },
+    { "type": "jsonField", "command": 1, "path": "applied", "equals": true },
+    { "type": "fileNotContains", "path": ".hos/${fixture.staleFile}", "text": "STALE", "expect": "the stale framework file is restored" },
+    { "type": "fileExists", "path": ".hos/tickets/${fixture.ticketId}/ticket.md", "expect": "project ticket survives the upgrade" },
+    { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
+  ]
+}

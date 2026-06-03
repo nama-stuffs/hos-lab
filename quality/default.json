@@ -1,0 +1,11 @@
+{
+  "score": 0.94,
+  "dimensions": {
+    "coherence": 0.95,
+    "clarity": 0.95,
+    "ac-discipline": 0.92
+  },
+  "notes": "12 personas + protocols agree after the dedup/coherence passes (one owner per rule, retrospective owns lessons); docs are doc.md-audited with action+validation; spec protocol enforces atomic/minimal/non-redundant AC, though no project specs exist yet to sample.",
+  "gradedBy": "agent",
+  "model": "claude-opus-4-8"
+}

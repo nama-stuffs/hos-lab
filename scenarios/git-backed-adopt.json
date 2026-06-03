@@ -1,0 +1,20 @@
+{
+  "id": "git-backed-adopt",
+  "fixture": "git-backed",
+  "requiresGit": true,
+  "phase": "adopt",
+  "classification": "adopt",
+  "candidateHosArea": ".hos/tools/lib/install-files.mjs",
+  "commands": [
+    ["status"],
+    ["adopt", "--name", "Lab Git", "--agents-strategy", "append"],
+    ["doctor"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "mode", "equals": "adopt" },
+    { "type": "jsonField", "command": 1, "path": "agents.strategy", "equals": "append" },
+    { "type": "fileContains", "path": "AGENTS.md", "text": "Keep this." },
+    { "type": "fileContains", "path": "AGENTS.md", "text": "## HOS" },
+    { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
+  ]
+}

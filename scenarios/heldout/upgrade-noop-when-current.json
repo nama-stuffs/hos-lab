@@ -1,0 +1,16 @@
+{
+  "id": "heldout-upgrade-noop-when-current",
+  "fixture": "empty",
+  "phase": "upgrade",
+  "classification": "upgrade",
+  "candidateHosArea": ".hos/tools/lib/upgrade.mjs",
+  "commands": [
+    ["init", "--name", "Held Out Upgrade"],
+    ["upgrade", "--from", "${source.path}"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "applied", "equals": false },
+    { "type": "jsonField", "command": 1, "path": "changes.update", "equals": 0, "expect": "upgrading an up-to-date install changes nothing (idempotent)" },
+    { "type": "jsonField", "command": 1, "path": "changes.add", "equals": 0 }
+  ]
+}

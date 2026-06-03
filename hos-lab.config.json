@@ -1,0 +1,20 @@
+{
+  "candidates": {
+    "default": {
+      "type": "local",
+      "path": "../hos"
+    },
+    "example-overlay": {
+      "type": "overlay",
+      "base": "default",
+      "overlay": "overlays/example"
+    },
+    "weak-policy": {
+      "type": "overlay",
+      "base": "default",
+      "overlay": "overlays/weak-policy"
+    }
+  },
+  "workspace": ".runs",
+  "matrix": "generated"
+}

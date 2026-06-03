@@ -1,0 +1,29 @@
+{
+  "id": "evidence-reporting",
+  "fixture": "evidence-reporting",
+  "phase": "report",
+  "classification": "report",
+  "candidateHosArea": ".hos/tools/lib/report.mjs",
+  "commands": [
+    ["init", "--name", "Lab Evidence"],
+    ["ticket", "create", "Evidence flow", "--acceptance", "report and metrics work"],
+    ["session", "open", "Evidence request"],
+    ["session", "attach", "${command.2}", "${command.1.id}", "--reason", "task"],
+    ["ticket", "move", "${command.1.id}", "reproduced"],
+    ["ticket", "move", "${command.1.id}", "fixed"],
+    ["ticket", "verify", "${command.1.id}", "--result", "pass"],
+    ["ticket", "move", "${command.1.id}", "verified"],
+    ["retro", "${command.1.id}", "--outcome", "no-op"],
+    ["session", "close", "${command.2}", "--summary", "Done"],
+    ["report", "${command.2}", "--format", "md"],
+    ["metrics", "ticket", "${command.1.id}"]
+  ],
+  "assertions": [
+    { "type": "commandPathExists", "command": 10, "path": "0" },
+    { "type": "fileFromCommandContains", "command": 10, "path": "0", "text": "## Optimization" },
+    { "type": "jsonField", "command": 11, "path": "status", "equals": "verified" },
+    { "type": "jsonField", "command": 11, "path": "verifyPass", "equals": 1 },
+    { "type": "jsonField", "command": 11, "path": "retrospective", "equals": true },
+    { "type": "jsonArrayIncludes", "command": 11, "path": "retroOutcomes", "includes": "no-op" }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "id": "new-empty-project",
+  "fixture": "empty",
+  "phase": "install",
+  "classification": "install",
+  "candidateHosArea": ".hos/tools/lib/install-files.mjs",
+  "commands": [
+    ["status"],
+    ["init", "--name", "Lab New"],
+    ["doctor"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "mode", "equals": "install" },
+    { "type": "fileExists", "path": "DESIGN.md" },
+    { "type": "fileExists", "path": "CLAUDE.md" },
+    { "type": "fileExists", "path": ".gitignore" },
+    { "type": "fileMissing", "path": "README.md" },
+    { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
+  ]
+}

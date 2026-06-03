@@ -1,0 +1,26 @@
+{
+  "id": "parallel-claim",
+  "fixture": "empty",
+  "phase": "parallel",
+  "classification": "parallel",
+  "candidateHosArea": ".hos/tools/lib/ledger.mjs",
+  "commands": [
+    ["init", "--name", "Lab Parallel"],
+    ["ticket", "create", "Alpha task"],
+    ["ticket", "create", "Beta task"],
+    ["ticket", "list", "--claimable"],
+    ["ticket", "claim", "${command.1.id}", "--by", "worker-a"],
+    { "args": ["ticket", "claim", "${command.1.id}", "--by", "worker-b"], "allowFailure": true },
+    ["ticket", "list", "--claimable"],
+    ["ticket", "release", "${command.1.id}", "--stale"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 3, "path": "length", "equals": 2 },
+    { "type": "jsonField", "command": 4, "path": "ok", "equals": true },
+    { "type": "commandExit", "command": 5, "status": 1 },
+    { "type": "jsonField", "command": 5, "path": "ok", "equals": false },
+    { "type": "jsonField", "command": 5, "path": "claimedBy", "equals": "worker-a" },
+    { "type": "jsonField", "command": 6, "path": "length", "equals": 1 },
+    { "type": "jsonField", "command": 7, "path": "released", "equals": false }
+  ]
+}

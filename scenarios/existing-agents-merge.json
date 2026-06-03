@@ -1,0 +1,21 @@
+{
+  "id": "existing-agents-merge",
+  "fixture": "existing-agents",
+  "phase": "merge",
+  "classification": "merge",
+  "candidateHosArea": ".hos/tools/lib/merge.mjs",
+  "commands": [
+    ["merge", "agents"],
+    ["adopt", "--name", "Lab Agents", "--agents-strategy", "append"],
+    ["merge", "agents", "--apply", "append"],
+    ["doctor"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "action", "equals": "ask" },
+    { "type": "jsonField", "command": 1, "path": "agents.strategy", "equals": "append" },
+    { "type": "jsonField", "command": 2, "path": "strategy", "equals": "noop" },
+    { "type": "fileContains", "path": "AGENTS.md", "text": "House rule: ship small." },
+    { "type": "fileContains", "path": "AGENTS.md", "text": "## HOS" },
+    { "type": "jsonField", "command": 3, "path": "ok", "equals": true }
+  ]
+}

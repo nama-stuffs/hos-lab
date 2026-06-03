@@ -1,0 +1,35 @@
+{
+  "id": "privacy-contribution-guard",
+  "fixture": "privacy",
+  "phase": "contribute",
+  "classification": "privacy",
+  "candidateHosArea": ".hos/tools/lib/contribute.mjs",
+  "commands": [
+    ["init", "--name", "Lab Privacy"],
+    ["contribute", "--title", "Privacy guard"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "noDirectPr", "equals": true },
+    { "type": "commandPathExists", "command": 1, "path": "bundle.manifest" },
+    { "type": "commandPathExists", "command": 1, "path": "bundle.prBody" },
+    {
+      "type": "jsonFileField",
+      "command": 1,
+      "path": "bundle.manifest",
+      "jsonPath": "privacy.hostProjectFilesAllowed",
+      "equals": false
+    },
+    {
+      "type": "fileFromCommandNotContains",
+      "command": 1,
+      "path": "bundle.manifest",
+      "text": "PRIVATE_HOST_CODE_SENTINEL"
+    },
+    {
+      "type": "fileFromCommandNotContains",
+      "command": 1,
+      "path": "bundle.prBody",
+      "text": "PRIVATE_HOST_CODE_SENTINEL"
+    }
+  ]
+}

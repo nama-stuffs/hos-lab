@@ -1,0 +1,23 @@
+{
+  "id": "acceptance-criteria-spec",
+  "fixture": "empty",
+  "phase": "spec",
+  "classification": "spec",
+  "candidateHosArea": ".hos/tools/lib/spec.mjs",
+  "commands": [
+    ["init", "--name", "Lab Spec"],
+    ["spec", "add", "Login", "--area", "auth", "--acceptance", "user signs in and a session starts|wrong password shows an error|wrong password shows an error"],
+    ["spec", "criteria"],
+    ["spec", "lint"]
+  ],
+  "assertions": [
+    { "type": "fileExists", "path": ".hos/doc/spec/auth/login.md" },
+    { "type": "fileContains", "path": ".hos/doc/spec/auth/login.md", "text": "## Acceptance Criteria" },
+    { "type": "fileNotContains", "path": ".hos/doc/spec/auth/login.md", "text": "## Behavior" },
+    { "type": "jsonArrayObjectIncludes", "command": 2, "path": "", "field": "capability", "equals": "Login" },
+    { "type": "jsonField", "command": 2, "path": "0.criteria.length", "equals": 3 },
+    { "type": "jsonField", "command": 3, "path": "total", "equals": 3 },
+    { "type": "jsonArrayObjectIncludes", "command": 3, "path": "issues", "field": "kind", "equals": "compound" },
+    { "type": "jsonArrayObjectIncludes", "command": 3, "path": "issues", "field": "kind", "equals": "duplicate" }
+  ]
+}
