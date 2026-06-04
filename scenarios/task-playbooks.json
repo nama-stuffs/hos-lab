@@ -1,0 +1,21 @@
+{
+  "id": "task-playbooks",
+  "fixture": "empty",
+  "phase": "tasks",
+  "classification": "tasks",
+  "aspect": "tasks",
+  "candidateHosArea": ".hos/tools/lib/task.mjs",
+  "commands": [
+    ["init", "--name", "Lab Tasks"],
+    ["task", "list"],
+    ["task", "match", "optimize the harness"],
+    ["task", "match", "audit the files"],
+    ["task", "match", "simplify this function"]
+  ],
+  "assertions": [
+    { "type": "jsonArrayObjectIncludes", "command": 1, "field": "name", "equals": "self-optimization" },
+    { "type": "jsonField", "command": 2, "path": "0.name", "equals": "self-optimization" },
+    { "type": "jsonField", "command": 3, "path": "0.name", "equals": "audit" },
+    { "type": "jsonField", "command": 4, "path": "0.name", "equals": "code-optimization" }
+  ]
+}

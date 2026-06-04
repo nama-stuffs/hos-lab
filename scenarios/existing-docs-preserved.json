@@ -13,7 +13,7 @@
     { "type": "fileEquals", "path": "DESIGN.md", "text": "# Existing Design\n" },
     { "type": "fileEquals", "path": "CLAUDE.md", "text": "See AGENTS.md.\n" },
     { "type": "fileContains", "path": ".gitignore", "text": "dist/" },
-    { "type": "fileContains", "path": ".gitignore", "text": ".hos/task/*" },
+    { "type": "fileContains", "path": ".gitignore", "text": ".hos/reports/" },
     { "type": "fileEquals", "path": "src/index.js", "text": "export const host = true;\n" },
     { "type": "jsonField", "command": 1, "path": "ok", "equals": true }
   ]

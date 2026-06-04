@@ -1,10 +1,20 @@
 {
   "candidate": "default",
-  "savedAt": "2026-06-03T09:11:09.910Z",
+  "savedAt": "2026-06-04T13:18:07.771Z",
   "score": {
-    "overall": 0.994,
+    "overall": 0.996,
     "aspects": {
       "spec": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
+      "audit": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
+      "autonomy": {
         "score": 1,
         "passed": 1,
         "total": 1
@@ -39,14 +49,19 @@
         "passed": 1,
         "total": 1
       },
+      "tasks": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
+      },
       "efficiency": {
         "score": 1,
         "processFrictions": 0
       },
       "coverage": {
         "score": 1,
-        "passed": 14,
-        "total": 14
+        "passed": 17,
+        "total": 17
       },
       "quality": {
         "score": 0.94,
@@ -58,7 +73,7 @@
         }
       }
     },
-    "scenarios": 14,
+    "scenarios": 17,
     "frictionsByType": {}
   }
 }

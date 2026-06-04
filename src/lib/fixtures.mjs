@@ -23,9 +23,11 @@ function copyHosDir(sourcePath, targetPath) {
         recursive: true,
         filter: (src) => {
             const rel = relative(sourceHos, src).replaceAll("\\", "/");
+            // Copy the whole harness surface; only disposable run artifacts
+            // (reports, per-ticket evidence) are left out. task/ now holds shipped
+            // playbooks, so it is part of the surface, not scratch.
             return rel === ""
                 || (!rel.startsWith("reports/")
-                    && (!rel.startsWith("task/") || rel === "task/README.md")
                     && !/\/evidence(\/|$)/.test(rel));
         }
     });
@@ -138,8 +140,21 @@ function setupPrivacy(sourcePath, targetPath) {
     return { sentinel: "PRIVATE_HOST_CODE_SENTINEL" };
 }
 
+function setupAudit(sourcePath, targetPath) {
+    dropIn(sourcePath, targetPath);
+    runHos(targetPath, ["init", "--name", "Lab Audit"]);
+    const settingsPath = join(targetPath, ".hos", "hos.json");
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
+    settings.audit = { include: ["src/**/*.js"], exclude: [] };
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+    mkdirSync(join(targetPath, "src"), { recursive: true });
+    writeFileSync(join(targetPath, "src", "app.js"), "export const a = 1;\n");
+    return {};
+}
+
 const FIXTURES = {
     empty: setupEmpty,
+    "audit-scope": setupAudit,
     "existing-node": setupNode,
     "existing-python": setupPython,
     "docs-preserved": setupDocs,

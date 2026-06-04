@@ -1,0 +1,23 @@
+{
+  "id": "autonomy-gate",
+  "fixture": "empty",
+  "phase": "autonomy",
+  "classification": "autonomy",
+  "aspect": "autonomy",
+  "candidateHosArea": ".hos/tools/lib/autonomy.mjs",
+  "commands": [
+    ["init", "--name", "Lab Autonomy"],
+    ["autonomy", "show"],
+    ["autonomy", "gate", "high"],
+    ["autonomy", "gate", "low"],
+    ["autonomy", "set", "high"],
+    ["autonomy", "gate", "high"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "granted", "equals": "medium" },
+    { "type": "jsonField", "command": 2, "path": "escalate", "equals": true },
+    { "type": "jsonField", "command": 3, "path": "ok", "equals": true },
+    { "type": "jsonField", "command": 4, "path": "granted", "equals": "high" },
+    { "type": "jsonField", "command": 5, "path": "ok", "equals": true }
+  ]
+}

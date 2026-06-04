@@ -1,9 +1,9 @@
 {
   "name": "hos-lab",
-  "version": "0.1.0-beta",
+  "version": "0.2.0-beta",
   "private": true,
   "type": "module",
-  "description": "Black-box scored benchmark for HOS: install, adopt, upgrade, orchestration, retrieval, and process efficiency.",
+  "description": "Black-box scored benchmark for HOS: install, adopt, upgrade, orchestration, retrieval, autonomy, audit, tasks, and process efficiency.",
   "scripts": {
     "run": "node src/cli.mjs run",
     "test": "node --test",

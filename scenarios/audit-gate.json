@@ -1,0 +1,20 @@
+{
+  "id": "audit-gate",
+  "fixture": "audit-scope",
+  "phase": "audit",
+  "classification": "audit",
+  "aspect": "audit",
+  "candidateHosArea": ".hos/tools/lib/audit.mjs",
+  "commands": [
+    { "args": ["audit", "check"], "allowFailure": true, "phase": "audit" },
+    ["audit", "record", "src/app.js", "--by", "backend"],
+    ["audit", "check"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "scopeConfigured", "equals": true },
+    { "type": "jsonField", "command": 0, "path": "ok", "equals": false },
+    { "type": "jsonField", "command": 0, "path": "unaudited", "includes": "src/app.js" },
+    { "type": "jsonField", "command": 1, "path": "ok", "equals": true },
+    { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
+  ]
+}

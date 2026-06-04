@@ -42,6 +42,9 @@ here and in `src/lib/scoring.mjs`.
 | `retrieval` | 1 | policy recall / application / precision (`hos bench`) | yes |
 | `process` | 1 | lifecycle: verify + retro events, execute/verify split | yes |
 | `safety` | 1 | contribution privacy and scope | yes |
+| `autonomy` | 1 | change-level gate: granted vs required, escalation | yes |
+| `audit` | 1 | production-file audit ledger: unaudited / drift / record | yes |
+| `tasks` | 1 | keyword-activated task playbooks: list and match routing | yes |
 | `efficiency` | 1.5 | absence of process friction (faster, fewer credits) | yes |
 | `coverage` | 1 | overall scenario pass rate | yes |
 

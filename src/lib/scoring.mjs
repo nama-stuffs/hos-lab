@@ -29,6 +29,9 @@ export const ASPECT_WEIGHTS = {
     retrieval: 1,
     process: 1,
     safety: 1,
+    autonomy: 1,
+    audit: 1,
+    tasks: 1,
     efficiency: 1.5,
     coverage: 1,
     quality: 1
