@@ -10,7 +10,8 @@
   ],
   "assertions": [
     { "type": "jsonField", "command": 1, "path": "applied", "equals": false },
-    { "type": "jsonField", "command": 1, "path": "changes.update", "equals": 0, "expect": "upgrading an up-to-date install changes nothing (idempotent)" },
-    { "type": "jsonField", "command": 1, "path": "changes.add", "equals": 0 }
+    { "type": "jsonField", "command": 1, "path": "changes.add", "equals": 0, "expect": "an up-to-date install adds nothing (idempotent)" },
+    { "type": "jsonField", "command": 1, "path": "changes.overwrite", "equals": 0 },
+    { "type": "jsonField", "command": 1, "path": "changes.conflict", "equals": 0 }
   ]
 }

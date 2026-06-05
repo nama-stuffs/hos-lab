@@ -1,0 +1,21 @@
+{
+  "id": "inbox-bus",
+  "fixture": "empty",
+  "phase": "orchestration",
+  "classification": "deep-log",
+  "aspect": "orchestration",
+  "candidateHosArea": ".hos/tools/lib/msg.mjs",
+  "commands": [
+    ["init", "--name", "Lab Inbox"],
+    ["msg", "send", "steer alpha please", "--to", "alpha"],
+    ["msg", "list", "--to", "alpha"],
+    ["msg", "drain", "--to", "alpha"],
+    ["msg", "list", "--to", "alpha"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "ok", "equals": true },
+    { "type": "jsonField", "command": 2, "path": "length", "equals": 1, "expect": "the message is pending for alpha" },
+    { "type": "jsonField", "command": 3, "path": "length", "equals": 1, "expect": "drain delivers it once" },
+    { "type": "jsonField", "command": 4, "path": "length", "equals": 0, "expect": "drained messages are archived, not re-delivered" }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "candidate": "default",
-  "savedAt": "2026-06-04T13:18:07.771Z",
+  "savedAt": "2026-06-05T07:48:13.772Z",
   "score": {
     "overall": 0.996,
     "aspects": {
@@ -26,8 +26,8 @@
       },
       "orchestration": {
         "score": 1,
-        "passed": 2,
-        "total": 2
+        "passed": 3,
+        "total": 3
       },
       "process": {
         "score": 1,
@@ -43,6 +43,11 @@
         "score": 1,
         "passed": 2,
         "total": 2
+      },
+      "memory": {
+        "score": 1,
+        "passed": 1,
+        "total": 1
       },
       "safety": {
         "score": 1,
@@ -60,8 +65,8 @@
       },
       "coverage": {
         "score": 1,
-        "passed": 17,
-        "total": 17
+        "passed": 19,
+        "total": 19
       },
       "quality": {
         "score": 0.94,
@@ -73,7 +78,7 @@
         }
       }
     },
-    "scenarios": 17,
+    "scenarios": 19,
     "frictionsByType": {}
   }
 }

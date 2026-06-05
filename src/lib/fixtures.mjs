@@ -4,6 +4,7 @@ import {
     existsSync,
     mkdirSync,
     readFileSync,
+    rmSync,
     writeFileSync
 } from "node:fs";
 import { join, relative } from "node:path";
@@ -112,12 +113,14 @@ function setupUpgrade(sourcePath, targetPath) {
     const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
     settings.hos = { ...(settings.hos || {}), version: "0.0.1" };
     writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
-    // The fixture owns which framework file is made stale, so the scenario asserts
-    // the capability (a stale framework file is restored) without hardcoding a
-    // name that a persona rewrite might remove.
-    const staleFile = "persona/architect.md";
-    writeFileSync(join(targetPath, ".hos", staleFile), "STALE\n");
-    return { ticketId: ticket.id, staleFile };
+    // The fixture owns which files it edits, so the scenario asserts the merge
+    // capability without hardcoding names a persona rewrite might remove: a local
+    // edit the three-way merge must KEEP, and a deleted file it must restore.
+    const localFile = "persona/architect.md";
+    writeFileSync(join(targetPath, ".hos", localFile), "LOCAL EDIT - keep me\n");
+    const addedFile = "persona/ui.md";
+    rmSync(join(targetPath, ".hos", addedFile), { force: true });
+    return { ticketId: ticket.id, localFile, addedFile };
 }
 
 function setupGit(sourcePath, targetPath) {

@@ -11,9 +11,10 @@
   ],
   "assertions": [
     { "type": "jsonField", "command": 0, "path": "applied", "equals": false },
-    { "type": "jsonField", "command": 0, "path": "changes.update", "gte": 1, "expect": "dry-run detects >=1 stale framework file" },
     { "type": "jsonField", "command": 1, "path": "applied", "equals": true },
-    { "type": "fileNotContains", "path": ".hos/${fixture.staleFile}", "text": "STALE", "expect": "the stale framework file is restored" },
+    { "type": "jsonField", "command": 1, "path": "conflicts.length", "equals": 0, "expect": "clean three-way merge, no conflicts" },
+    { "type": "fileContains", "path": ".hos/${fixture.localFile}", "text": "LOCAL EDIT", "expect": "the project's local framework edit is kept, not overwritten" },
+    { "type": "fileExists", "path": ".hos/${fixture.addedFile}", "expect": "a missing framework file is restored" },
     { "type": "fileExists", "path": ".hos/tickets/${fixture.ticketId}/ticket.md", "expect": "project ticket survives the upgrade" },
     { "type": "jsonField", "command": 2, "path": "ok", "equals": true }
   ]

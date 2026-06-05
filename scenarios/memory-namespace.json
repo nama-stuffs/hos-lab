@@ -1,0 +1,21 @@
+{
+  "id": "memory-namespace",
+  "fixture": "empty",
+  "phase": "memory",
+  "classification": "memory",
+  "aspect": "memory",
+  "candidateHosArea": ".hos/tools/lib/memory.mjs",
+  "commands": [
+    ["init", "--name", "Lab Memory"],
+    ["memory", "add", "Prefer composition over inheritance", "--scope", "persona/architect", "--trigger", "zzznomatch"],
+    ["memory", "add", "Use design tokens only", "--scope", "persona/frontend", "--trigger", "zzznomatch"],
+    ["memory", "add", "Auth lives in the gateway module", "--kind", "fact", "--scope", "area/auth", "--trigger", "authfact"],
+    ["compose", "architect+frontend"],
+    ["memory", "search", "authfact", "--kind", "fact"]
+  ],
+  "assertions": [
+    { "type": "commandStdoutContains", "command": 4, "text": "composition over inheritance", "expect": "compose unions the architect namespace memory" },
+    { "type": "commandStdoutContains", "command": 4, "text": "design tokens only", "expect": "compose unions the frontend namespace memory" },
+    { "type": "jsonArrayObjectIncludes", "command": 5, "field": "kind", "equals": "fact", "expect": "search --kind fact returns a typed memory" }
+  ]
+}

@@ -27,6 +27,7 @@ export const ASPECT_WEIGHTS = {
     orchestration: 1,
     spec: 1,
     retrieval: 1,
+    memory: 1,
     process: 1,
     safety: 1,
     autonomy: 1,

@@ -40,6 +40,7 @@ here and in `src/lib/scoring.mjs`.
 | `orchestration` | 1 | claim mutex, deep log, dispatch, stale reclaim | yes |
 | `spec` | 1 | acceptance-criteria format, collection, lint | yes |
 | `retrieval` | 1 | policy recall / application / precision (`hos bench`) | yes |
+| `memory` | 1 | typed long-term memory: kinds and persona-namespaced compose | yes |
 | `process` | 1 | lifecycle: verify + retro events, execute/verify split | yes |
 | `safety` | 1 | contribution privacy and scope | yes |
 | `autonomy` | 1 | change-level gate: granted vs required, escalation | yes |
