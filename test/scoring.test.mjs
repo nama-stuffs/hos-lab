@@ -24,6 +24,13 @@ test("process frictions lower efficiency; assertion frictions do not", () => {
     assert.equal(score({ results: [result("a", false, [{ type: "assertion" }])], scenarios }).aspects.efficiency.score, 1);
 });
 
+test("orchestration classification maps to the orchestration aspect", () => {
+    const scenarios = [scn("a", "orchestration")];
+    const s = score({ results: [result("a", true)], scenarios });
+    assert.equal(s.aspects.orchestration.score, 1);
+    assert.equal(s.aspects.other, undefined);
+});
+
 test("compareScores flags a per-aspect regression as worse overall", () => {
     const base = { overall: 1, aspects: { install: { score: 1 }, retrieval: { score: 1 } } };
     const current = { overall: 0.9, aspects: { install: { score: 1 }, retrieval: { score: 0.5 } } };

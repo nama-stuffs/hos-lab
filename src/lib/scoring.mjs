@@ -16,6 +16,7 @@ const CLASSIFICATION_ASPECT = {
     report: "process",
     privacy: "safety",
     spec: "spec",
+    orchestration: "orchestration",
     parallel: "orchestration",
     "deep-log": "orchestration"
 };

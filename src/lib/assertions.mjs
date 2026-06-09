@@ -208,6 +208,13 @@ function assertCommandStdout(scenario, assertion, commands) {
         : friction(scenario, assertion, String(command.stdout).slice(0, 160));
 }
 
+function assertCommandStderr(scenario, assertion, commands) {
+    const command = commandAt(commands, assertion.command);
+    return String(command.stderr).includes(assertion.text)
+        ? null
+        : friction(scenario, assertion, String(command.stderr).slice(0, 160));
+}
+
 function assertFileFromCommandNotContains(scenario, assertion, commands, context) {
     const command = commandAt(commands, assertion.command);
     const rawPath = getPath(parsedCommandJson(command), assertion.path);
@@ -242,6 +249,9 @@ export function evaluateAssertions({ scenario, fixtureDir, commands, context = {
                 }
                 if (assertion.type === "commandStdoutContains") {
                     return assertCommandStdout(scenario, assertion, commands);
+                }
+                if (assertion.type === "commandStderrContains") {
+                    return assertCommandStderr(scenario, assertion, commands);
                 }
                 if (assertion.type === "jsonField" || assertion.type === "jsonArrayIncludes") {
                     return assertJsonField(scenario, assertion, commands);

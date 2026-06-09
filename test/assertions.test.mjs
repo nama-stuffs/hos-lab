@@ -43,3 +43,29 @@ test("failed assertions create structured friction", () => {
         rmSync(root, { recursive: true, force: true });
     }
 });
+
+test("commandStderrContains reads command stderr", () => {
+    const root = tempRoot();
+    try {
+        const scenario = {
+            id: "stderr-demo",
+            assertions: [
+                { type: "commandStderrContains", command: 0, text: "workflow gate failed" },
+                { type: "commandStderrContains", command: 1, text: "workflow gate failed" }
+            ]
+        };
+        const friction = evaluateAssertions({
+            scenario,
+            fixtureDir: root,
+            commands: [
+                { status: 1, stdout: "", stderr: "workflow gate failed: missing plan" },
+                { status: 0, stdout: "", stderr: "different error" }
+            ]
+        });
+
+        assert.equal(friction.length, 1);
+        assert.equal(friction[0].command, "command[1]");
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});

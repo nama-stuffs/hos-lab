@@ -1,0 +1,37 @@
+{
+  "id": "persona-workflow-gate",
+  "fixture": "empty",
+  "phase": "orchestration",
+  "classification": "orchestration",
+  "candidateHosArea": ".hos/tools/lib/workflow.mjs",
+  "commands": [
+    ["init", "--name", "Lab Workflow"],
+    ["workflow", "start", "Protocol request", "--title", "Protocol workflow", "--acceptance", "protocol gate works", "--actor", "backend", "--level", "high"],
+    ["workflow", "plan", "${command.1.ticket}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "captured proof"],
+    ["ticket", "move", "${command.1.ticket}", "reproduced"],
+    ["ticket", "move", "${command.1.ticket}", "fixed"],
+    ["compose", "backend+tester"],
+    ["dispatch", "${command.1.ticket}", "--lenses", "backend", "--by", "worker-a"],
+    ["run", "${command.1.ticket}", "--by", "tester", "--", "echo", "PROOF"],
+    ["ticket", "verify", "${command.1.ticket}", "--result", "pass", "--by", "tester", "--step", "s2", "--evidence", "run log"],
+    ["ticket", "move", "${command.1.ticket}", "verified"],
+    ["retro", "${command.1.ticket}", "--outcome", "no-op"],
+    ["workflow", "lint", "${command.1.ticket}"],
+    ["ticket", "create", "Bypass", "--acceptance", "cannot bypass", "--actor", "backend", "--level", "high"],
+    {
+      "args": ["ticket", "move", "${command.12.id}", "verified"],
+      "allowFailure": true
+    }
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "session", "matches": "^S-" },
+    { "type": "jsonField", "command": 1, "path": "ticket", "matches": "^T-" },
+    { "type": "commandStdoutContains", "command": 5, "text": "Orchestration Protocol" },
+    { "type": "commandStdoutContains", "command": 5, "text": "Testing Protocol" },
+    { "type": "commandStdoutContains", "command": 6, "text": "Alpha plan" },
+    { "type": "jsonField", "command": 9, "path": "status", "equals": "verified" },
+    { "type": "jsonField", "command": 11, "path": "ok", "equals": true },
+    { "type": "commandExit", "command": 13, "status": 1 },
+    { "type": "commandStderrContains", "command": 13, "text": "workflow gate failed" }
+  ]
+}
