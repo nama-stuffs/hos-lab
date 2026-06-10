@@ -1,6 +1,6 @@
 {
   "candidate": "default",
-  "savedAt": "2026-06-05T07:48:13.772Z",
+  "savedAt": "2026-06-10T18:18:58.397Z",
   "score": {
     "overall": 0.996,
     "aspects": {
@@ -24,20 +24,20 @@
         "passed": 1,
         "total": 1
       },
-      "orchestration": {
-        "score": 1,
-        "passed": 3,
-        "total": 3
-      },
       "process": {
         "score": 1,
-        "passed": 1,
-        "total": 1
+        "passed": 2,
+        "total": 2
+      },
+      "orchestration": {
+        "score": 1,
+        "passed": 5,
+        "total": 5
       },
       "install": {
         "score": 1,
-        "passed": 6,
-        "total": 6
+        "passed": 7,
+        "total": 7
       },
       "upgrade": {
         "score": 1,
@@ -65,8 +65,8 @@
       },
       "coverage": {
         "score": 1,
-        "passed": 19,
-        "total": 19
+        "passed": 23,
+        "total": 23
       },
       "quality": {
         "score": 0.94,
@@ -78,7 +78,7 @@
         }
       }
     },
-    "scenarios": 19,
+    "scenarios": 23,
     "frictionsByType": {}
   }
 }

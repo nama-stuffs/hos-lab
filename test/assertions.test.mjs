@@ -44,6 +44,33 @@ test("failed assertions create structured friction", () => {
     }
 });
 
+test("expected values resolve command tokens, pinning one command's output to another's", () => {
+    const root = tempRoot();
+    try {
+        const scenario = {
+            id: "token-equals-demo",
+            assertions: [
+                { type: "jsonField", command: 1, path: "ticket", equals: "${command.0.id}" },
+                { type: "jsonArrayObjectIncludes", command: 1, path: "similar", field: "id", equals: "${command.0.id}" },
+                { type: "jsonField", command: 1, path: "session", equals: "${command.0.id}" }
+            ]
+        };
+        const friction = evaluateAssertions({
+            scenario,
+            fixtureDir: root,
+            commands: [
+                { status: 0, stdout: "", json: { id: "T-9" } },
+                { status: 0, stdout: "", json: { ticket: "T-9", session: "S-1", similar: [{ id: "T-9" }] } }
+            ]
+        });
+
+        assert.equal(friction.length, 1, "only the mismatched field fails");
+        assert.equal(friction[0].expected, "equals \"T-9\"", "friction reports the resolved expectation");
+    } finally {
+        rmSync(root, { recursive: true, force: true });
+    }
+});
+
 test("commandStderrContains reads command stderr", () => {
     const root = tempRoot();
     try {

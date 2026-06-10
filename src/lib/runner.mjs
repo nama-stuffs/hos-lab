@@ -90,6 +90,42 @@ function commandAllowFailure(command) {
     return !Array.isArray(command) && Boolean(command.allowFailure);
 }
 
+function commandExpectsQuestion(command) {
+    return !Array.isArray(command) && Boolean(command.expectsQuestion);
+}
+
+// True when a command's JSON output contains an interactive question (an
+// `action: "ask"` or a non-empty `questions` list) anywhere in the tree. An
+// agent at that point needs a human decision - in an unattended cold start that
+// is manual steering, so it is friction unless the scenario declares it with
+// `expectsQuestion: true` on the command.
+export function containsQuestion(value) {
+    if (!value || typeof value !== "object") {
+        return false;
+    }
+    if (value.action === "ask") {
+        return true;
+    }
+    if (Array.isArray(value.questions) && value.questions.length) {
+        return true;
+    }
+    return Object.values(value).some(containsQuestion);
+}
+
+function steeringFriction(scenario, command, result) {
+    return {
+        scenarioId: scenario.id,
+        phase: "invariant",
+        command: result.command,
+        expected: "the flow proceeds without a human decision (or the command declares expectsQuestion)",
+        actual: "output contains an interactive question",
+        type: "manual-steering",
+        classification: scenario.classification || "process",
+        candidateHosArea: scenario.candidateHosArea || "",
+        reproducible: true
+    };
+}
+
 function commandPhase(command) {
     return Array.isArray(command) ? "" : command.phase || "";
 }
@@ -226,6 +262,11 @@ export async function runScenario({ scenario, config, runDir }) {
             friction.push(commandFailure(scenario, command, result));
             break;
         }
+        // Always-on invariant, independent of per-scenario assertions: a flow
+        // that stops for a human question is not a cold start.
+        if (result.status === 0 && !commandExpectsQuestion(command) && containsQuestion(result.json)) {
+            friction.push(steeringFriction(scenario, command, result));
+        }
     }
 
     if (!friction.some((item) => item.phase === "environment")) {
@@ -267,11 +308,20 @@ export async function runLab(overrides = {}) {
     const runDir = join(config.workspace, runId);
     mkdirSync(runDir, { recursive: true });
 
-    // Resolve the candidate (materializing an overlay into this run's workspace);
-    // the original repo is never mutated.
+    // Resolve the candidate: every candidate is materialized into this run's
+    // workspace as the clean drop-in surface a real install receives; the
+    // original repository is only ever read.
     const candidate = resolveCandidate(config.candidateName, config, runDir);
-    config.source = { ...config.source, path: candidate.path, name: candidate.name, materialized: candidate.materialized };
+    config.source = {
+        ...config.source,
+        path: candidate.path,
+        origin: candidate.origin || candidate.path,
+        name: candidate.name,
+        materialized: candidate.materialized,
+        install: candidate.install || null
+    };
 
+    const originBefore = sourceVersion(config.source.origin);
     const before = sourceVersion(config.source.path);
     const results = [];
     const preflightFriction = preflight();
@@ -301,6 +351,7 @@ export async function runLab(overrides = {}) {
         }
     }
     const after = sourceVersion(config.source.path);
+    const originAfter = sourceVersion(config.source.origin);
 
     const friction = results.flatMap((result) => result.friction);
     if (before && after && before !== after) {
@@ -312,6 +363,18 @@ export async function runLab(overrides = {}) {
             actual: after,
             classification: "source-mutation",
             candidateHosArea: config.source.path,
+            reproducible: true
+        });
+    }
+    if (originBefore && originAfter && originBefore !== originAfter) {
+        friction.push({
+            scenarioId: "source-library",
+            phase: "post-run",
+            command: "node .hos/tools/hos.mjs version",
+            expected: originBefore,
+            actual: originAfter,
+            classification: "source-mutation",
+            candidateHosArea: config.source.origin,
             reproducible: true
         });
     }
@@ -331,11 +394,17 @@ export async function runLab(overrides = {}) {
 
     const summary = {
         runId,
-        source: { name: config.sourceName, path: toPosix(config.source.path) },
+        source: {
+            name: config.sourceName,
+            path: toPosix(config.source.path),
+            origin: toPosix(config.source.origin),
+            install: config.source.install
+        },
         workspace: toPosix(config.workspace),
         sourceVersionBefore: before,
         sourceVersionAfter: after,
         sourceUnchanged: !before || !after || before === after,
+        originUnchanged: !originBefore || !originAfter || originBefore === originAfter,
         counts,
         score: score({ results, scenarios, quality }),
         scenarios: results.map((result) => ({

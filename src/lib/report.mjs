@@ -11,8 +11,8 @@ function renderMarkdown(summary, friction) {
     const lines = [
         `# HOS Lab Run ${summary.runId}`,
         "",
-        `Source: \`${summary.source.path}\``,
-        `Source unchanged: **${summary.sourceUnchanged ? "yes" : "no"}**`,
+        `Origin: \`${summary.source.origin || summary.source.path}\` (unchanged: **${summary.originUnchanged === false ? "no" : "yes"}**)`,
+        `Install surface: \`${summary.source.path}\` - ${summary.source.install?.mode === "git-tracked" ? `clean-clone equivalent, ${summary.source.install.files} tracked files` : "plain copy"} (unchanged: **${summary.sourceUnchanged ? "yes" : "no"}**)`,
         "",
         "## Summary",
         "",

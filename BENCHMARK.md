@@ -26,7 +26,32 @@ A candidate is defined in `hos-lab.config.json`:
 An `overlay` candidate is the base copied into the run workspace with the overlay
 files applied on top. **The original repo is never mutated**, so you can benchmark
 a persona rewrite, a protocol tweak, or a tooling change side by side. Run a
-candidate with `run --candidate <name>`; compare two with `battle <A> <B>`.
+candidate with `run --candidate <name>`; benchmark any checkout without a config
+entry with `run --candidate-path <dir>`; compare two with `battle <A> <B>`.
+
+## Cold-start fidelity
+
+The lab measures the experience of a **fresh, unattended install** - the moment a
+real user drops HOS into a project and an agent drives it cold. Two rules make
+every run faithful to that moment:
+
+1. **Clean-clone materialization.** A git-backed candidate is installed from its
+   *tracked* `.hos/` + `AGENTS.md` set, exactly what a clone delivers. Local
+   runtime state (caches, inboxes, dogfood tickets, reports) never reaches a
+   fixture, and a file missing from git fails here the same way it fails users.
+   Content comes from the working tree, so uncommitted edits are benchmarked as
+   they would ship.
+2. **The no-steering invariant.** After every successful command, the runner
+   scans the output for an interactive question (`action: "ask"` or a non-empty
+   `questions` list). An undeclared question is `manual-steering` friction - a
+   cold start stopped for a human. Scenarios that test the asking capability
+   itself opt in per command with `expectsQuestion: true`.
+
+The headline scenario is `cold-start-journey`: adopt into a real project, then
+the full intake -> plan -> prove -> verify -> close -> retrospective -> report
+chain, question-free, with the report content asserted at the end. `run` exits
+non-zero on any failure, friction, or baseline regression, so CI or a loop needs
+no human to read the result.
 
 ## Aspects and weights
 
@@ -62,6 +87,7 @@ Every failure is recorded with a `type`, so the analysis is actionable:
 | `blocking` | a command that should pass exits non-zero - an agent would be stuck | efficiency |
 | `missing-capability` | the harness lacks a command the flow needs | efficiency |
 | `inefficiency` / `redundant-step` | a flow takes more work than it should | efficiency |
+| `manual-steering` | the flow stopped for an undeclared human question | efficiency |
 | `assertion` | a capability is present but its outcome is wrong | the aspect |
 | `environment` / `harness` | the lab or host, not the candidate | neither |
 

@@ -1,0 +1,16 @@
+{
+  "id": "heldout-adopt-asks-nothing",
+  "fixture": "existing-python",
+  "phase": "install",
+  "classification": "adopt",
+  "candidateHosArea": ".hos/tools/lib/merge.mjs",
+  "commands": [
+    ["adopt", "--name", "Sealed Adopt"],
+    ["status"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "ok", "equals": true },
+    { "type": "jsonField", "command": 0, "path": "agents.action", "equals": "noop" },
+    { "type": "jsonField", "command": 1, "path": "mode", "equals": "run" }
+  ]
+}

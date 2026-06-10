@@ -5,7 +5,7 @@
   "classification": "merge",
   "candidateHosArea": ".hos/tools/lib/merge.mjs",
   "commands": [
-    ["merge", "agents"],
+    { "args": ["merge", "agents"], "expectsQuestion": true },
     ["adopt", "--name", "Lab Agents", "--agents-strategy", "append"],
     ["merge", "agents", "--apply", "append"],
     ["doctor"]

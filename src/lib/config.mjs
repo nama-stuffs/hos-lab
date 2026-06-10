@@ -23,8 +23,15 @@ export function loadConfig(overrides = {}) {
         throw new Error(`missing config: ${CONFIG_PATH}`);
     }
     const config = readJson(CONFIG_PATH);
-    const candidates = config.candidates || config.sources || {};
-    const candidateName = overrides.candidate || overrides.source || "default";
+    const candidates = { ...(config.candidates || config.sources || {}) };
+    // An ad-hoc candidate: benchmark any checkout by path, no config edit needed
+    // (e.g. a released clone, a worktree, a colleague's variant).
+    if (overrides.candidatePath) {
+        candidates.adhoc = { type: "local", path: String(overrides.candidatePath) };
+    }
+    const candidateName = overrides.candidatePath
+        ? "adhoc"
+        : overrides.candidate || overrides.source || "default";
     const candidateDef = candidates[candidateName];
     if (!candidateDef) {
         throw new Error(`unknown candidate: ${candidateName} (have: ${Object.keys(candidates).join(", ") || "none"})`);

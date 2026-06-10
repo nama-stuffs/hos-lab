@@ -40,8 +40,9 @@ export const ASPECT_WEIGHTS = {
 };
 
 // Process frictions - the kind that block or slow an agent - drive the efficiency
-// aspect, so "frictionless" literally scores higher.
-const PROCESS_FRICTION_TYPES = new Set(["blocking", "missing-capability", "inefficiency", "redundant-step"]);
+// aspect, so "frictionless" literally scores higher. "manual-steering" is the
+// always-on cold-start invariant: the flow stopped for a human question.
+const PROCESS_FRICTION_TYPES = new Set(["blocking", "missing-capability", "inefficiency", "redundant-step", "manual-steering"]);
 
 const round = (n) => Math.round(n * 1000) / 1000;
 

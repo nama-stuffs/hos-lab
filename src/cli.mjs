@@ -35,8 +35,15 @@ function candidateName(f) {
 
 async function run(args) {
     const f = flags(args);
-    const name = candidateName(f);
-    const result = await runLab({ candidate: f.candidate, source: f.source || "default", scenario: f.scenario || "", matrix: f.matrix || "" });
+    const adhoc = typeof f["candidate-path"] === "string" ? f["candidate-path"] : "";
+    const name = adhoc ? "adhoc" : candidateName(f);
+    const result = await runLab({
+        candidate: f.candidate,
+        candidatePath: adhoc,
+        source: f.source || "default",
+        scenario: f.scenario || "",
+        matrix: f.matrix || ""
+    });
 
     const out = {
         ok: result.ok,
@@ -58,7 +65,9 @@ async function run(args) {
     }
 
     print(out);
-    process.exit(result.ok ? 0 : 1);
+    // Hands-off gate: any failure, friction, or baseline regression is a
+    // non-zero exit, so CI or a loop needs no human to read the run.
+    process.exit(result.ok && !out.vsBaseline?.regressed ? 0 : 1);
 }
 
 async function baseline(args) {

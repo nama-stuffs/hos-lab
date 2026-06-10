@@ -1,0 +1,24 @@
+{
+  "id": "intake-dedupe",
+  "fixture": "empty",
+  "phase": "orchestration",
+  "classification": "orchestration",
+  "candidateHosArea": ".hos/tools/lib/ledger.mjs",
+  "commands": [
+    ["init", "--name", "Lab Dedupe"],
+    ["workflow", "start", "Fix the login button flicker", "--actor", "frontend"],
+    ["ticket", "find", "login button regression"],
+    ["workflow", "start", "Polish the login button copy"],
+    ["workflow", "start", "More login button flicker work", "--ticket", "${command.1.ticket}"],
+    ["ticket", "list"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "created", "equals": true },
+    { "type": "jsonArrayObjectIncludes", "command": 2, "path": "", "field": "id", "equals": "${command.1.ticket}" },
+    { "type": "jsonField", "command": 2, "path": "0.id", "equals": "${command.1.ticket}" },
+    { "type": "jsonArrayObjectIncludes", "command": 3, "path": "similar", "field": "id", "equals": "${command.1.ticket}" },
+    { "type": "jsonField", "command": 4, "path": "ticket", "equals": "${command.1.ticket}" },
+    { "type": "jsonField", "command": 4, "path": "created", "equals": false },
+    { "type": "jsonField", "command": 5, "path": "length", "equals": 2 }
+  ]
+}

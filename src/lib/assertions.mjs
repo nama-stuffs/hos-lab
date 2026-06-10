@@ -43,6 +43,20 @@ function commandAt(commands, index) {
     return command;
 }
 
+// Expected values may reference earlier command output (`${command.N.field}`),
+// the same tokens command args resolve - so an assertion can pin one command's
+// result to another's (e.g. the ticket `find` returns is the ticket `start`
+// created). String-valued expectations only; non-strings pass through.
+function resolveExpected(assertion, context) {
+    const resolved = { ...assertion };
+    for (const key of ["equals", "includes", "matches"]) {
+        if (typeof resolved[key] === "string") {
+            resolved[key] = resolveTokens(resolved[key], context);
+        }
+    }
+    return resolved;
+}
+
 function compareValue(actual, assertion) {
     if (Object.prototype.hasOwnProperty.call(assertion, "equals")) {
         return Object.is(actual, assertion.equals);
@@ -119,20 +133,22 @@ function parsedCommandJson(command) {
     }
 }
 
-function assertJsonField(scenario, assertion, commands) {
+function assertJsonField(scenario, assertion, commands, context) {
     const command = commandAt(commands, assertion.command);
     const actual = getPath(parsedCommandJson(command), assertion.path);
-    return compareValue(actual, assertion)
+    const resolved = resolveExpected(assertion, context);
+    return compareValue(actual, resolved)
         ? null
-        : friction(scenario, assertion, JSON.stringify(actual));
+        : friction(scenario, resolved, JSON.stringify(actual));
 }
 
-function assertJsonArrayObjectIncludes(scenario, assertion, commands) {
+function assertJsonArrayObjectIncludes(scenario, assertion, commands, context) {
     const command = commandAt(commands, assertion.command);
     const actual = getPath(parsedCommandJson(command), assertion.path);
+    const resolved = resolveExpected(assertion, context);
     const ok = Array.isArray(actual)
-        && actual.some((item) => Object.is(getPath(item, assertion.field), assertion.equals));
-    return ok ? null : friction(scenario, assertion, JSON.stringify(actual));
+        && actual.some((item) => Object.is(getPath(item, resolved.field), resolved.equals));
+    return ok ? null : friction(scenario, resolved, JSON.stringify(actual));
 }
 
 function assertFile(scenario, assertion, fixtureDir, context) {
@@ -254,10 +270,10 @@ export function evaluateAssertions({ scenario, fixtureDir, commands, context = {
                     return assertCommandStderr(scenario, assertion, commands);
                 }
                 if (assertion.type === "jsonField" || assertion.type === "jsonArrayIncludes") {
-                    return assertJsonField(scenario, assertion, commands);
+                    return assertJsonField(scenario, assertion, commands, fullContext);
                 }
                 if (assertion.type === "jsonArrayObjectIncludes") {
-                    return assertJsonArrayObjectIncludes(scenario, assertion, commands);
+                    return assertJsonArrayObjectIncludes(scenario, assertion, commands, fullContext);
                 }
                 if (assertion.type === "commandPathExists") {
                     return assertPathFromCommand(scenario, assertion, commands, fullContext);

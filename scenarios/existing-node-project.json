@@ -12,6 +12,8 @@
   "assertions": [
     { "type": "jsonField", "command": 0, "path": "mode", "equals": "adopt" },
     { "type": "jsonArrayIncludes", "command": 1, "path": "detected", "includes": "package.json" },
+    { "type": "jsonField", "command": 1, "path": "agents.state", "equals": "already-hos" },
+    { "type": "jsonField", "command": 1, "path": "agents.action", "equals": "noop" },
     { "type": "fileEquals", "path": "README.md", "text": "# Host Project\n" },
     { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "runtime.install", "equals": "npm install" },
     { "type": "fileJsonField", "path": ".hos/hos.json", "jsonPath": "runtime.dev", "equals": "npm run dev" },

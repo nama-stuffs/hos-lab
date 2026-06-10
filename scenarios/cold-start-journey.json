@@ -1,0 +1,42 @@
+{
+  "id": "cold-start-journey",
+  "fixture": "existing-node",
+  "phase": "cold-start",
+  "classification": "orchestration",
+  "aspect": "process",
+  "candidateHosArea": ".hos/tools/lib/workflow.mjs",
+  "commands": [
+    ["status"],
+    ["adopt", "--name", "Cold Walk"],
+    ["status"],
+    ["ticket", "find", "ship the discount helper"],
+    ["workflow", "start", "Ship the discount helper", "--acceptance", "helper ships with captured test proof", "--actor", "backend", "--level", "medium"],
+    ["autonomy", "gate", "medium"],
+    ["workflow", "plan", "${command.4.ticket}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "captured command proof"],
+    ["run", "${command.4.ticket}", "--by", "tester", "--", "node", "--version"],
+    ["ticket", "move", "${command.4.ticket}", "fixed"],
+    ["ticket", "verify", "${command.4.ticket}", "--result", "pass", "--by", "rev+tester", "--step", "s2", "--evidence", "run log"],
+    ["ticket", "move", "${command.4.ticket}", "verified"],
+    ["retro", "${command.4.ticket}", "--outcome", "no-op", "--by", "optimizer+curator"],
+    ["workflow", "lint", "${command.4.ticket}"],
+    ["session", "close", "${command.4.session}", "--summary", "Cold walk shipped with proof"],
+    ["report"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "mode", "equals": "adopt" },
+    { "type": "jsonField", "command": 1, "path": "ok", "equals": true },
+    { "type": "jsonField", "command": 1, "path": "agents.state", "equals": "already-hos" },
+    { "type": "jsonField", "command": 1, "path": "agents.action", "equals": "noop" },
+    { "type": "jsonField", "command": 2, "path": "mode", "equals": "run" },
+    { "type": "jsonField", "command": 3, "path": "length", "equals": 0 },
+    { "type": "jsonField", "command": 4, "path": "created", "equals": true },
+    { "type": "jsonField", "command": 4, "path": "session", "matches": "^S-" },
+    { "type": "jsonField", "command": 5, "path": "ok", "equals": true },
+    { "type": "jsonField", "command": 6, "path": "next", "matches": "hos ticket verify" },
+    { "type": "jsonField", "command": 9, "path": "next", "matches": "move .* verified" },
+    { "type": "jsonField", "command": 10, "path": "status", "equals": "verified" },
+    { "type": "jsonField", "command": 12, "path": "ok", "equals": true },
+    { "type": "commandPathExists", "command": 14, "path": "0" },
+    { "type": "fileFromCommandContains", "command": 14, "path": "0", "text": "Ship the discount helper" }
+  ]
+}
