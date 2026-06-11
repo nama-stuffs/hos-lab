@@ -48,10 +48,15 @@ every run faithful to that moment:
    itself opt in per command with `expectsQuestion: true`.
 
 The headline scenario is `cold-start-journey`: adopt into a real project, then
-the full intake -> plan -> prove -> verify -> close -> retrospective -> report
-chain, question-free, with the report content asserted at the end. `run` exits
-non-zero on any failure, friction, or baseline regression, so CI or a loop needs
-no human to read the result.
+the full intake -> plan -> compose -> prove -> fresh-session verify -> close ->
+retrospective -> report chain, question-free, with the report content asserted
+at the end. The chain exercises HOS's contract v2: every lifecycle actor is
+composed or dispatched on the record, the verify event names the planned
+verifier, and verification runs outside every work session - the held-out
+`verify-needs-fresh-context` scenario closes the gate on a candidate that
+accepts a self-declared, same-session verifier. `run` exits non-zero on any
+failure, friction, or baseline regression, so CI or a loop needs no human to
+read the result.
 
 ## Aspects and weights
 

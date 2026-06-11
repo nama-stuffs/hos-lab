@@ -1,0 +1,19 @@
+{
+  "id": "intake-title-language",
+  "fixture": "empty",
+  "phase": "intake",
+  "classification": "process",
+  "aspect": "process",
+  "candidateHosArea": ".hos/tools/lib/workflow.mjs",
+  "commands": [
+    ["init", "--name", "Lab Title"],
+    ["workflow", "start", "Javítsd a bejelentkezési hibát"],
+    ["ticket", "title", "${command.1.ticket}", "Fix the login failure"],
+    ["ticket", "show", "${command.1.ticket}"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 1, "path": "hint", "matches": "hos ticket title" },
+    { "type": "jsonField", "command": 2, "path": "title", "equals": "Fix the login failure" },
+    { "type": "jsonField", "command": 3, "path": "data.title", "equals": "Fix the login failure" }
+  ]
+}

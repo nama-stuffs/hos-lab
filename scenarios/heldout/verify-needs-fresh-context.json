@@ -1,0 +1,25 @@
+{
+  "id": "verify-needs-fresh-context",
+  "fixture": "empty",
+  "phase": "orchestration",
+  "classification": "orchestration",
+  "aspect": "process",
+  "candidateHosArea": ".hos/tools/lib/workflow.mjs",
+  "commands": [
+    ["init", "--name", "Heldout Gate"],
+    ["workflow", "start", "Guarded close", "--acceptance", "the gate enforces enacted separation", "--actor", "backend", "--level", "medium"],
+    ["workflow", "plan", "${command.1.ticket}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "captured proof"],
+    ["run", "${command.1.ticket}", "--by", "backend", "--", "echo", "PROOF"],
+    ["ticket", "verify", "${command.1.ticket}", "--result", "pass", "--by", "backend"],
+    {
+      "args": ["ticket", "move", "${command.1.ticket}", "verified"],
+      "allowFailure": true
+    }
+  ],
+  "assertions": [
+    { "type": "commandExit", "command": 5, "status": 1 },
+    { "type": "commandStderrContains", "command": 5, "text": "not the plan's verification actor" },
+    { "type": "commandStderrContains", "command": 5, "text": "ran in work session" },
+    { "type": "commandStderrContains", "command": 5, "text": "never composed" }
+  ]
+}
