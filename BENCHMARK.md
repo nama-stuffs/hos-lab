@@ -54,9 +54,13 @@ at the end. The chain exercises HOS's contract v2: every lifecycle actor is
 composed or dispatched on the record, the verify event names the planned
 verifier, and verification runs outside every work session - the held-out
 `verify-needs-fresh-context` scenario closes the gate on a candidate that
-accepts a self-declared, same-session verifier. `run` exits non-zero on any
-failure, friction, or baseline regression, so CI or a loop needs no human to
-read the result.
+accepts a self-declared, same-session verifier. Scope is gated the same way:
+`ticket-split-flow` drives a compound request through `hos ticket split` -
+children carry their own plans, proofs, and verifications; the parent closes
+only after they are terminal - and the held-out `compound-close-blocked`
+catches a candidate that lets a multi-deliverable ticket close as one unit.
+`run` exits non-zero on any failure, friction, or baseline regression, so CI or
+a loop needs no human to read the result.
 
 ## Aspects and weights
 

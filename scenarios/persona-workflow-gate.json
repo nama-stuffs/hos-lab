@@ -7,6 +7,7 @@
   "commands": [
     ["init", "--name", "Lab Workflow"],
     ["workflow", "start", "Protocol request", "--title", "Protocol workflow", "--acceptance", "protocol gate works", "--actor", "backend", "--level", "high"],
+    ["autonomy", "set", "high"],
     ["workflow", "plan", "${command.1.ticket}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "captured proof"],
     ["ticket", "move", "${command.1.ticket}", "reproduced"],
     ["compose", "backend+tester"],
@@ -21,20 +22,20 @@
     ["workflow", "lint", "${command.1.ticket}"],
     ["ticket", "create", "Bypass", "--acceptance", "cannot bypass", "--actor", "backend", "--level", "high"],
     {
-      "args": ["ticket", "move", "${command.14.id}", "verified"],
+      "args": ["ticket", "move", "${command.15.id}", "verified"],
       "allowFailure": true
     }
   ],
   "assertions": [
     { "type": "jsonField", "command": 1, "path": "session", "matches": "^S-" },
     { "type": "jsonField", "command": 1, "path": "ticket", "matches": "^T-" },
-    { "type": "commandStdoutContains", "command": 4, "text": "Orchestration Protocol" },
-    { "type": "commandStdoutContains", "command": 4, "text": "Testing Protocol" },
-    { "type": "commandStdoutContains", "command": 5, "text": "Alpha plan" },
-    { "type": "commandStdoutContains", "command": 5, "text": "session open" },
-    { "type": "jsonField", "command": 11, "path": "status", "equals": "verified" },
-    { "type": "jsonField", "command": 13, "path": "ok", "equals": true },
-    { "type": "commandExit", "command": 15, "status": 1 },
-    { "type": "commandStderrContains", "command": 15, "text": "workflow gate failed" }
+    { "type": "commandStdoutContains", "command": 5, "text": "Orchestration Protocol" },
+    { "type": "commandStdoutContains", "command": 5, "text": "Testing Protocol" },
+    { "type": "commandStdoutContains", "command": 6, "text": "Alpha plan" },
+    { "type": "commandStdoutContains", "command": 6, "text": "session open" },
+    { "type": "jsonField", "command": 12, "path": "status", "equals": "verified" },
+    { "type": "jsonField", "command": 14, "path": "ok", "equals": true },
+    { "type": "commandExit", "command": 16, "status": 1 },
+    { "type": "commandStderrContains", "command": 16, "text": "workflow gate failed" }
   ]
 }

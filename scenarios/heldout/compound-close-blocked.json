@@ -1,0 +1,28 @@
+{
+  "id": "compound-close-blocked",
+  "fixture": "empty",
+  "phase": "orchestration",
+  "classification": "orchestration",
+  "aspect": "process",
+  "candidateHosArea": ".hos/tools/lib/workflow.mjs",
+  "commands": [
+    ["init", "--name", "Heldout Compound"],
+    ["workflow", "start", "Ship the whole platform", "--acceptance", "the api serves|the ui renders|the docs publish|the deploy runs", "--actor", "backend"],
+    ["workflow", "plan", "${command.1.ticket}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "captured proof"],
+    ["compose", "backend", "--ticket", "${command.1.ticket}"],
+    ["run", "${command.1.ticket}", "--by", "backend", "--", "echo", "PROOF"],
+    ["ticket", "move", "${command.1.ticket}", "fixed"],
+    ["session", "open", "Verify the platform"],
+    ["compose", "rev+tester", "--ticket", "${command.1.ticket}"],
+    ["ticket", "verify", "${command.1.ticket}", "--result", "pass", "--by", "rev+tester"],
+    {
+      "args": ["ticket", "move", "${command.1.ticket}", "verified"],
+      "allowFailure": true
+    }
+  ],
+  "assertions": [
+    { "type": "commandExit", "command": 9, "status": 1 },
+    { "type": "commandStderrContains", "command": 9, "text": "exceed scope.maxAcceptance" },
+    { "type": "commandStderrContains", "command": 9, "text": "hos ticket split" }
+  ]
+}

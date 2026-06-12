@@ -1,0 +1,45 @@
+{
+  "id": "ticket-split-flow",
+  "fixture": "empty",
+  "phase": "orchestration",
+  "classification": "orchestration",
+  "candidateHosArea": ".hos/tools/lib/ledger.mjs",
+  "commands": [
+    ["init", "--name", "Lab Split"],
+    ["workflow", "start", "Port the legacy book system", "--acceptance", "pattern core works|catalog persists|book builds|studio runs", "--actor", "backend"],
+    ["workflow", "plan", "${command.1.ticket}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "child gates carry the proof"],
+    ["ticket", "split", "${command.1.ticket}", "Pattern core", "--acceptance", "the pattern core validates and classifies"],
+    ["ticket", "split", "${command.1.ticket}", "Book builder", "--acceptance", "the book builds with generated assets"],
+    ["ticket", "show", "${command.3.id}"],
+    ["workflow", "plan", "${command.3.id}", "--execute", "backend", "--verify", "rev+tester", "--evidence", "captured proof"],
+    ["compose", "backend", "--ticket", "${command.3.id}"],
+    ["run", "${command.3.id}", "--by", "backend", "--", "echo", "PROOF"],
+    ["ticket", "move", "${command.3.id}", "fixed"],
+    ["session", "open", "Verify the pattern core"],
+    ["compose", "rev+tester", "--ticket", "${command.3.id}"],
+    ["ticket", "verify", "${command.3.id}", "--result", "pass", "--by", "rev+tester"],
+    {
+      "args": ["ticket", "move", "${command.1.ticket}", "verified"],
+      "allowFailure": true
+    },
+    ["ticket", "move", "${command.3.id}", "verified"],
+    ["ticket", "move", "${command.4.id}", "superseded"],
+    ["session", "open", "Verify the split parent"],
+    ["compose", "rev+tester", "--ticket", "${command.1.ticket}"],
+    ["ticket", "verify", "${command.1.ticket}", "--result", "pass", "--by", "rev+tester"],
+    ["ticket", "move", "${command.1.ticket}", "verified"],
+    ["retro", "${command.1.ticket}", "--outcome", "no-op"],
+    ["workflow", "lint", "${command.1.ticket}"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 2, "path": "hint", "matches": "hos ticket split" },
+    { "type": "jsonField", "command": 3, "path": "parent", "equals": "${command.1.ticket}" },
+    { "type": "jsonField", "command": 5, "path": "data.parent", "equals": "${command.1.ticket}" },
+    { "type": "jsonField", "command": 5, "path": "data.actor", "equals": "backend" },
+    { "type": "commandExit", "command": 13, "status": 1 },
+    { "type": "commandStderrContains", "command": 13, "text": "only after its children are terminal" },
+    { "type": "jsonField", "command": 14, "path": "status", "equals": "verified" },
+    { "type": "jsonField", "command": 19, "path": "status", "equals": "verified" },
+    { "type": "jsonField", "command": 21, "path": "ok", "equals": true }
+  ]
+}
