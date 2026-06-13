@@ -18,6 +18,7 @@
     { "type": "jsonField", "command": 2, "path": "0.criteria.length", "equals": 3 },
     { "type": "jsonField", "command": 3, "path": "total", "equals": 3 },
     { "type": "jsonArrayObjectIncludes", "command": 3, "path": "issues", "field": "kind", "equals": "compound" },
-    { "type": "jsonArrayObjectIncludes", "command": 3, "path": "issues", "field": "kind", "equals": "duplicate" }
+    { "type": "jsonArrayObjectIncludes", "command": 3, "path": "issues", "field": "kind", "equals": "duplicate" },
+    { "type": "jsonArrayObjectIncludes", "command": 3, "path": "reconstruction.notReady", "field": "path", "equals": "auth/login.md" }
   ]
 }

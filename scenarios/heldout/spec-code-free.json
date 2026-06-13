@@ -1,0 +1,22 @@
+{
+  "id": "spec-code-free",
+  "fixture": "empty",
+  "phase": "spec",
+  "classification": "spec",
+  "aspect": "spec",
+  "candidateHosArea": ".hos/tools/lib/spec.mjs",
+  "commands": [
+    ["init", "--name", "Heldout Spec"],
+    ["spec", "add", "Profile", "--area", "account", "--acceptance", "the user sees their saved display name|the ProfileController.save() method writes the users table|render the React component when the form submits"],
+    ["spec", "lint"],
+    {
+      "args": ["spec", "lint", "--strict"],
+      "allowFailure": true
+    }
+  ],
+  "assertions": [
+    { "type": "jsonArrayObjectIncludes", "command": 2, "path": "issues", "field": "kind", "equals": "code-leak" },
+    { "type": "jsonField", "command": 2, "path": "reconstruction.score", "equals": 0 },
+    { "type": "commandExit", "command": 3, "status": 1 }
+  ]
+}
