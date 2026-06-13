@@ -7,6 +7,7 @@ import {
     rmSync,
     writeFileSync
 } from "node:fs";
+import { cp } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 export function hasGit() {
@@ -18,15 +19,20 @@ export function hasGit() {
     }
 }
 
-function copyHosDir(sourcePath, targetPath) {
+// Async copy so many fixtures can materialize concurrently: when the runner
+// drives scenarios in parallel, a synchronous cpSync here would block the event
+// loop and serialize every other scenario's spawns behind this one copy.
+async function copyHosDir(sourcePath, targetPath) {
     const sourceHos = join(sourcePath, ".hos");
-    cpSync(sourceHos, join(targetPath, ".hos"), {
+    await cp(sourceHos, join(targetPath, ".hos"), {
         recursive: true,
         filter: (src) => {
             const rel = relative(sourceHos, src).replaceAll("\\", "/");
             // Copy the whole harness surface; only disposable run artifacts
             // (reports, per-ticket evidence) are left out. task/ now holds shipped
-            // playbooks, so it is part of the surface, not scratch.
+            // playbooks, so it is part of the surface, not scratch. The full
+            // surface must be copied verbatim - the upgrade no-op scenario diffs
+            // the fixture against the source, so any omission shows up as drift.
             return rel === ""
                 || (!rel.startsWith("reports/")
                     && !/\/evidence(\/|$)/.test(rel));
@@ -34,8 +40,8 @@ function copyHosDir(sourcePath, targetPath) {
     });
 }
 
-function dropIn(sourcePath, targetPath) {
-    copyHosDir(sourcePath, targetPath);
+async function dropIn(sourcePath, targetPath) {
+    await copyHosDir(sourcePath, targetPath);
     if (!existsSync(join(targetPath, "AGENTS.md"))) {
         cpSync(join(sourcePath, "AGENTS.md"), join(targetPath, "AGENTS.md"));
     }
@@ -57,12 +63,12 @@ function packageJson(scripts = {}) {
     return JSON.stringify({ name: "lab-host", scripts }, null, 2) + "\n";
 }
 
-function setupEmpty(sourcePath, targetPath) {
-    dropIn(sourcePath, targetPath);
+async function setupEmpty(sourcePath, targetPath) {
+    await dropIn(sourcePath, targetPath);
     return {};
 }
 
-function setupNode(sourcePath, targetPath) {
+async function setupNode(sourcePath, targetPath) {
     mkdirSync(join(targetPath, "src"), { recursive: true });
     writeFileSync(join(targetPath, "README.md"), "# Host Project\n");
     writeFileSync(join(targetPath, "src", "index.js"), "export const answer = 42;\n");
@@ -73,19 +79,19 @@ function setupNode(sourcePath, targetPath) {
         test: "node --test",
         e2e: "playwright test"
     }));
-    dropIn(sourcePath, targetPath);
+    await dropIn(sourcePath, targetPath);
     return {};
 }
 
-function setupPython(sourcePath, targetPath) {
+async function setupPython(sourcePath, targetPath) {
     mkdirSync(join(targetPath, "src"), { recursive: true });
     writeFileSync(join(targetPath, "pyproject.toml"), "[project]\nname = \"lab-python\"\n");
     writeFileSync(join(targetPath, "src", "app.py"), "print('hello')\n");
-    dropIn(sourcePath, targetPath);
+    await dropIn(sourcePath, targetPath);
     return {};
 }
 
-function setupDocs(sourcePath, targetPath) {
+async function setupDocs(sourcePath, targetPath) {
     mkdirSync(join(targetPath, "src"), { recursive: true });
     writeFileSync(join(targetPath, "README.md"), "# Keep Me\n");
     writeFileSync(join(targetPath, "DESIGN.md"), "# Existing Design\n");
@@ -93,20 +99,20 @@ function setupDocs(sourcePath, targetPath) {
     writeFileSync(join(targetPath, ".gitignore"), "dist/\n");
     writeFileSync(join(targetPath, "src", "index.js"), "export const host = true;\n");
     writeFileSync(join(targetPath, "package.json"), packageJson({ test: "node --test" }));
-    dropIn(sourcePath, targetPath);
+    await dropIn(sourcePath, targetPath);
     return {};
 }
 
-function setupAgents(sourcePath, targetPath) {
+async function setupAgents(sourcePath, targetPath) {
     mkdirSync(join(targetPath, "src"), { recursive: true });
     writeFileSync(join(targetPath, "AGENTS.md"), "# Host Agents\n\nHouse rule: ship small.\n");
     writeFileSync(join(targetPath, "package.json"), packageJson({ test: "node --test" }));
-    dropIn(sourcePath, targetPath);
+    await dropIn(sourcePath, targetPath);
     return {};
 }
 
-function setupUpgrade(sourcePath, targetPath) {
-    dropIn(sourcePath, targetPath);
+async function setupUpgrade(sourcePath, targetPath) {
+    await dropIn(sourcePath, targetPath);
     runHos(targetPath, ["init", "--name", "Lab Upgrade"]);
     const ticket = runHos(targetPath, ["ticket", "create", "Keep me through upgrade"]);
     const settingsPath = join(targetPath, ".hos", "hos.json");
@@ -123,7 +129,7 @@ function setupUpgrade(sourcePath, targetPath) {
     return { ticketId: ticket.id, localFile, addedFile };
 }
 
-function setupGit(sourcePath, targetPath) {
+async function setupGit(sourcePath, targetPath) {
     if (!hasGit()) {
         return { skip: "git not available" };
     }
@@ -132,19 +138,19 @@ function setupGit(sourcePath, targetPath) {
     writeFileSync(join(targetPath, "README.md"), "# Git Host\n");
     writeFileSync(join(targetPath, "AGENTS.md"), "# Git Host Agents\n\nKeep this.\n");
     writeFileSync(join(targetPath, "package.json"), packageJson({ test: "node --test" }));
-    dropIn(sourcePath, targetPath);
+    await dropIn(sourcePath, targetPath);
     return {};
 }
 
-function setupPrivacy(sourcePath, targetPath) {
+async function setupPrivacy(sourcePath, targetPath) {
     mkdirSync(join(targetPath, "src"), { recursive: true });
     writeFileSync(join(targetPath, "src", "private.js"), "PRIVATE_HOST_CODE_SENTINEL\n");
-    dropIn(sourcePath, targetPath);
+    await dropIn(sourcePath, targetPath);
     return { sentinel: "PRIVATE_HOST_CODE_SENTINEL" };
 }
 
-function setupAudit(sourcePath, targetPath) {
-    dropIn(sourcePath, targetPath);
+async function setupAudit(sourcePath, targetPath) {
+    await dropIn(sourcePath, targetPath);
     runHos(targetPath, ["init", "--name", "Lab Audit"]);
     const settingsPath = join(targetPath, ".hos", "hos.json");
     const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
@@ -168,13 +174,13 @@ const FIXTURES = {
     "evidence-reporting": setupEmpty
 };
 
-export function prepareFixture({ scenario, sourcePath, runDir }) {
+export async function prepareFixture({ scenario, sourcePath, runDir }) {
     const fixtureDir = join(runDir, "fixtures", scenario.id);
     mkdirSync(fixtureDir, { recursive: true });
     const setup = FIXTURES[scenario.fixture];
     if (!setup) {
         throw new Error(`unknown fixture: ${scenario.fixture}`);
     }
-    const context = setup(sourcePath, fixtureDir) || {};
+    const context = (await setup(sourcePath, fixtureDir)) || {};
     return { fixtureDir, context };
 }

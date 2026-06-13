@@ -1,6 +1,8 @@
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFile, execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
 import { join } from "node:path";
+import { promisify } from "node:util";
 import { evaluateAssertions, resolveTokens } from "./assertions.mjs";
 import { resolveCandidate } from "./candidate.mjs";
 import { loadConfig, loadScenarios, toPosix } from "./config.mjs";
@@ -33,8 +35,21 @@ function sourceVersion(sourcePath) {
     }
 }
 
+const execFileAsync = promisify(execFile);
+
 function nodeCommand() {
     return process.env.HOS_LAB_NODE || process.execPath;
+}
+
+// How many scenarios to drive at once. Each scenario runs its own commands
+// sequentially, so the cap is also the peak number of concurrent child
+// processes; default to the machine's parallelism, overridable for tuning.
+function scenarioConcurrency() {
+    const raw = Number(process.env.HOS_LAB_CONCURRENCY);
+    if (Number.isInteger(raw) && raw > 0) {
+        return raw;
+    }
+    return Math.max(2, availableParallelism());
 }
 
 function isSpawnFailure(text = "") {
@@ -130,25 +145,36 @@ function commandPhase(command) {
     return Array.isArray(command) ? "" : command.phase || "";
 }
 
-function runHosCommand({ fixtureDir, args, context }) {
+async function runHosCommand({ fixtureDir, args, context }) {
     const resolved = args.map((arg) => resolveTokens(arg, context));
     const full = [join(fixtureDir, ".hos", "tools", "hos.mjs"), ...resolved];
-    let result;
+    // Async spawn (not spawnSync): a synchronous wait here would block the event
+    // loop and serialize every scenario the pool is trying to run in parallel.
+    let stdout = "";
+    let stderr = "";
+    let status = 0;
     try {
-        result = spawnSync(nodeCommand(), full, {
+        const out = await execFileAsync(nodeCommand(), full, {
             cwd: fixtureDir,
-            encoding: "utf8"
+            encoding: "utf8",
+            maxBuffer: 32 * 1024 * 1024
         });
+        stdout = out.stdout || "";
+        stderr = out.stderr || "";
     } catch (error) {
-        result = { status: 1, stdout: "", stderr: error.message };
+        // execFile rejects on non-zero exit (and on spawn failure); the streams
+        // and exit code ride on the error object.
+        stdout = error.stdout || "";
+        stderr = error.stderr || error.message || "";
+        status = typeof error.code === "number" ? error.code : 1;
     }
-    const stdout = (result.stdout || "").trim();
-    const stderr = (result.stderr || result.error?.message || "").trim();
+    stdout = stdout.trim();
+    stderr = stderr.trim();
 
     return {
         args: resolved,
         command: `node .hos/tools/hos.mjs ${resolved.join(" ")}`.trim(),
-        status: result.status ?? 1,
+        status,
         stdout,
         stderr,
         json: parseJson(stdout),
@@ -215,7 +241,7 @@ export async function runScenario({ scenario, config, runDir }) {
 
     let prepared;
     try {
-        prepared = prepareFixture({
+        prepared = await prepareFixture({
             scenario,
             sourcePath: config.source.path,
             runDir
@@ -251,7 +277,7 @@ export async function runScenario({ scenario, config, runDir }) {
     };
 
     for (const command of scenario.commands || []) {
-        const result = runHosCommand({
+        const result = await runHosCommand({
             fixtureDir: prepared.fixtureDir,
             args: commandArgs(command),
             context
@@ -335,20 +361,36 @@ export async function runLab(overrides = {}) {
             friction: [preflightFriction]
         });
     } else {
-        for (const scenario of scenarios) {
-            try {
-                results.push(await runScenario({ scenario, config, runDir }));
-            } catch (error) {
-                results.push({
-                    id: scenario.id,
-                    ok: false,
-                    skipped: false,
-                    fixtureDir: "",
-                    commands: [],
-                    friction: [scenarioFailure(scenario, "runner", error)]
-                });
+        // Drive scenarios with a bounded worker pool. Scenarios are independent
+        // (each gets its own fixture dir; the candidate source is read-only), so
+        // they parallelize freely. Results are written by index to keep the
+        // report order identical to a serial run.
+        const ordered = new Array(scenarios.length);
+        let cursor = 0;
+        const worker = async () => {
+            for (;;) {
+                const index = cursor++;
+                if (index >= scenarios.length) {
+                    return;
+                }
+                const scenario = scenarios[index];
+                try {
+                    ordered[index] = await runScenario({ scenario, config, runDir });
+                } catch (error) {
+                    ordered[index] = {
+                        id: scenario.id,
+                        ok: false,
+                        skipped: false,
+                        fixtureDir: "",
+                        commands: [],
+                        friction: [scenarioFailure(scenario, "runner", error)]
+                    };
+                }
             }
-        }
+        };
+        const workers = Math.min(scenarioConcurrency(), scenarios.length);
+        await Promise.all(Array.from({ length: workers }, worker));
+        results.push(...ordered);
     }
     const after = sourceVersion(config.source.path);
     const originAfter = sourceVersion(config.source.origin);
