@@ -152,18 +152,50 @@ async function setupPrivacy(sourcePath, targetPath) {
 async function setupAudit(sourcePath, targetPath) {
     await dropIn(sourcePath, targetPath);
     runHos(targetPath, ["init", "--name", "Lab Audit"]);
-    const settingsPath = join(targetPath, ".hos", "hos.json");
-    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
-    settings.audit = { include: ["src/**/*.js"], exclude: [] };
-    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+    setAuditScope(targetPath, ["src/**/*.js"]);
     mkdirSync(join(targetPath, "src"), { recursive: true });
     writeFileSync(join(targetPath, "src", "app.js"), "export const a = 1;\n");
+    return {};
+}
+
+function setAuditScope(targetPath, include) {
+    const settingsPath = join(targetPath, ".hos", "hos.json");
+    const settings = JSON.parse(readFileSync(settingsPath, "utf8"));
+    settings.audit = { include, exclude: [] };
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n");
+}
+
+// A block-level monolith: one function well over the 60-line limit.
+function monolithSource() {
+    const body = Array.from({ length: 70 }, (_, i) => `  const x${i} = ${i};`).join("\n");
+    return `export function monolith() {\n${body}\n  return 0;\n}\n`;
+}
+
+// Monolith created AFTER init -> governed: the gate must refuse to record it.
+async function setupQualityGate(sourcePath, targetPath) {
+    await dropIn(sourcePath, targetPath);
+    runHos(targetPath, ["init", "--name", "Lab Quality"]);
+    setAuditScope(targetPath, ["src/**/*.js"]);
+    mkdirSync(join(targetPath, "src"), { recursive: true });
+    writeFileSync(join(targetPath, "src", "monolith.js"), monolithSource());
+    return {};
+}
+
+// Monolith created BEFORE init -> legacy: present in the baseline, so exempt.
+async function setupQualityLegacy(sourcePath, targetPath) {
+    mkdirSync(join(targetPath, "src"), { recursive: true });
+    writeFileSync(join(targetPath, "src", "legacy.js"), monolithSource());
+    await dropIn(sourcePath, targetPath);
+    runHos(targetPath, ["init", "--name", "Lab Legacy"]);
+    setAuditScope(targetPath, ["src/**/*.js"]);
     return {};
 }
 
 const FIXTURES = {
     empty: setupEmpty,
     "audit-scope": setupAudit,
+    "quality-gate": setupQualityGate,
+    "quality-legacy": setupQualityLegacy,
     "existing-node": setupNode,
     "existing-python": setupPython,
     "docs-preserved": setupDocs,

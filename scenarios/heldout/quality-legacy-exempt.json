@@ -1,0 +1,16 @@
+{
+  "id": "heldout-quality-legacy-exempt",
+  "fixture": "quality-legacy",
+  "phase": "audit",
+  "classification": "audit",
+  "aspect": "audit",
+  "candidateHosArea": ".hos/tools/lib/audit.mjs",
+  "commands": [
+    ["audit", "check"]
+  ],
+  "assertions": [
+    { "type": "jsonField", "command": 0, "path": "scopeConfigured", "equals": true },
+    { "type": "jsonField", "command": 0, "path": "ok", "equals": true, "expect": "a pre-existing monolith is legacy, so the gate stays green" },
+    { "type": "jsonArrayIncludes", "command": 0, "path": "exempt", "includes": "src/legacy.js" }
+  ]
+}

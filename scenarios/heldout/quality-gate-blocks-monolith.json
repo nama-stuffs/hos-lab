@@ -1,0 +1,18 @@
+{
+  "id": "heldout-quality-gate-blocks-monolith",
+  "fixture": "quality-gate",
+  "phase": "audit",
+  "classification": "audit",
+  "aspect": "audit",
+  "candidateHosArea": ".hos/tools/lib/quality.mjs",
+  "commands": [
+    { "args": ["audit", "record", "src/monolith.js", "--by", "backend"], "allowFailure": true },
+    { "args": ["audit", "check"], "allowFailure": true }
+  ],
+  "assertions": [
+    { "type": "commandExit", "command": 0, "status": 1, "expect": "recording a block-level monolith is refused" },
+    { "type": "commandStderrContains", "command": 0, "text": "quality gate" },
+    { "type": "jsonField", "command": 1, "path": "ok", "equals": false },
+    { "type": "jsonArrayObjectIncludes", "command": 1, "path": "quality", "field": "path", "equals": "src/monolith.js" }
+  ]
+}

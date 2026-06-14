@@ -1,6 +1,6 @@
 {
   "candidate": "default",
-  "savedAt": "2026-06-13T14:33:19.071Z",
+  "savedAt": "2026-06-14T08:04:51.506Z",
   "score": {
     "overall": 0.996,
     "aspects": {
@@ -11,8 +11,8 @@
       },
       "audit": {
         "score": 1,
-        "passed": 1,
-        "total": 1
+        "passed": 3,
+        "total": 3
       },
       "autonomy": {
         "score": 1,
@@ -65,8 +65,8 @@
       },
       "coverage": {
         "score": 1,
-        "passed": 28,
-        "total": 28
+        "passed": 30,
+        "total": 30
       },
       "quality": {
         "score": 0.94,
@@ -78,7 +78,7 @@
         }
       }
     },
-    "scenarios": 28,
+    "scenarios": 30,
     "frictionsByType": {}
   }
 }
