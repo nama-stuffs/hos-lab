@@ -191,11 +191,33 @@ async function setupQualityLegacy(sourcePath, targetPath) {
     return {};
 }
 
+// A documented function over the 40-line warn limit but under the 60 block: one
+// warn finding - legal to record, but it raises the ratchet on a re-record.
+function wideFunctionSource() {
+    const body = Array.from({ length: 45 }, (_, i) => `  const x${i} = ${i};`).join("\n");
+    return `// a wide but legal function\nexport function wide() {\n${body}\n  return 0;\n}\n`;
+}
+
+// Record a clean file, then dirty it to a warn-level version: the scenario's
+// re-record must hit the ratchet (governed code may not grow more complex).
+async function setupQualityRatchet(sourcePath, targetPath) {
+    await dropIn(sourcePath, targetPath);
+    runHos(targetPath, ["init", "--name", "Lab Ratchet"]);
+    setAuditScope(targetPath, ["src/**/*.js"]);
+    mkdirSync(join(targetPath, "src"), { recursive: true });
+    const file = join(targetPath, "src", "wide.js");
+    writeFileSync(file, "// the answer\nexport const answer = 42;\n");
+    runHos(targetPath, ["audit", "record", "src/wide.js", "--by", "backend"]);
+    writeFileSync(file, wideFunctionSource());
+    return {};
+}
+
 const FIXTURES = {
     empty: setupEmpty,
     "audit-scope": setupAudit,
     "quality-gate": setupQualityGate,
     "quality-legacy": setupQualityLegacy,
+    "quality-ratchet": setupQualityRatchet,
     "existing-node": setupNode,
     "existing-python": setupPython,
     "docs-preserved": setupDocs,

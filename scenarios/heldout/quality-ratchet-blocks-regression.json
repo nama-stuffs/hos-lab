@@ -1,0 +1,15 @@
+{
+  "id": "heldout-quality-ratchet-blocks-regression",
+  "fixture": "quality-ratchet",
+  "phase": "audit",
+  "classification": "audit",
+  "aspect": "audit",
+  "candidateHosArea": ".hos/tools/lib/audit.mjs",
+  "commands": [
+    { "args": ["audit", "record", "src/wide.js", "--by", "backend"], "allowFailure": true }
+  ],
+  "assertions": [
+    { "type": "commandExit", "command": 0, "status": 1, "expect": "re-recording a file that grew more complex is refused by the ratchet" },
+    { "type": "commandStderrContains", "command": 0, "text": "ratchet" }
+  ]
+}
